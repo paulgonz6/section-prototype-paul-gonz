@@ -7,6 +7,9 @@ export async function GET(
 ) {
   const { id } = await params
   const supabase = createServerClient()
+  if (!supabase) {
+    return NextResponse.json({ error: "Supabase not configured" }, { status: 503 })
+  }
 
   const { data, error } = await supabase
     .from("transcripts")

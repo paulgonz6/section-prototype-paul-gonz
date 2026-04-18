@@ -3,6 +3,9 @@ import { createServerClient } from "@/lib/supabase/server"
 
 export async function GET(request: Request) {
   const supabase = createServerClient()
+  if (!supabase) {
+    return NextResponse.json({ error: "Supabase not configured" }, { status: 503 })
+  }
   const { searchParams } = new URL(request.url)
 
   const department = searchParams.get("department")
@@ -41,6 +44,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const supabase = createServerClient()
+  if (!supabase) {
+    return NextResponse.json({ error: "Supabase not configured" }, { status: 503 })
+  }
   const body = await request.json()
 
   const { role, department, workflow_name, raw_transcript } = body

@@ -23,6 +23,7 @@ export const metadata: Metadata = {
 async function getTranscriptList() {
   try {
     const supabase = createServerClient()
+    if (!supabase) return []
     const { data } = await supabase
       .from("transcripts")
       .select("id, role, department, workflow_name, status, metadata")

@@ -9,6 +9,7 @@ export default async function TranscriptPage({
 }) {
   const { id } = await params
   const supabase = createServerClient()
+  if (!supabase) notFound()
 
   const { data: transcript, error } = await supabase
     .from("transcripts")

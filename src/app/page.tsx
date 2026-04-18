@@ -9,6 +9,7 @@ export default async function HomePage() {
 
   try {
     const supabase = createServerClient()
+    if (!supabase) throw new Error("Supabase not configured")
     const { data } = await supabase
       .from("transcripts")
       .select("id, role, department, workflow_name, metadata, status")

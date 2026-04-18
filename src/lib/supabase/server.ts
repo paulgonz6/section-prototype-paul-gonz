@@ -5,7 +5,7 @@ export function createServerClient() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!url || !key) {
-    throw new Error("Missing Supabase server environment variables")
+    return null
   }
 
   return createClient(url, key)
