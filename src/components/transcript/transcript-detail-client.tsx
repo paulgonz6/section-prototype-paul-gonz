@@ -28,40 +28,52 @@ export function TranscriptDetailClient({
     setError(null)
     setProcessingStatus("extracting")
 
-    const processPromise = fetch("/api/process", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transcriptId: transcript.id }),
-    })
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/transcripts/${transcript.id}`)
-        if (res.ok) {
-          const data = await res.json()
-          if (data.status === "recommending") {
-            setProcessingStatus("recommending")
-          }
-        }
-      } catch {
-        // ignore poll errors
-      }
-    }, 2000)
+    const body = JSON.stringify({ transcriptId: transcript.id })
+    const headers = { "Content-Type": "application/json" }
 
     try {
-      const res = await processPromise
-      clearInterval(pollInterval)
+      // Step 1: Extract workflow
+      const extractRes = await fetch("/api/process/extract", {
+        method: "POST",
+        headers,
+        body,
+      })
 
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || "Processing failed")
+      if (!extractRes.ok) {
+        const text = await extractRes.text()
+        try {
+          const data = JSON.parse(text)
+          throw new Error(data.error || "Extraction failed")
+        } catch (parseErr) {
+          if (parseErr instanceof SyntaxError) throw new Error("Extraction timed out — please try again")
+          throw parseErr
+        }
       }
 
-      const updated = await res.json()
+      // Step 2: Generate recommendations
+      setProcessingStatus("recommending")
+
+      const recRes = await fetch("/api/process/recommend", {
+        method: "POST",
+        headers,
+        body,
+      })
+
+      if (!recRes.ok) {
+        const text = await recRes.text()
+        try {
+          const data = JSON.parse(text)
+          throw new Error(data.error || "Recommendations failed")
+        } catch (parseErr) {
+          if (parseErr instanceof SyntaxError) throw new Error("Recommendations timed out — please try again")
+          throw parseErr
+        }
+      }
+
+      const updated = await recRes.json()
       setTranscript(updated)
       setProcessingStatus(null)
     } catch (err) {
-      clearInterval(pollInterval)
       setError(err instanceof Error ? err.message : "Processing failed")
       setProcessingStatus(null)
     } finally {
