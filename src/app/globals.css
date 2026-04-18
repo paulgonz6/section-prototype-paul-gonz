@@ -1,26 +1,88 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Deel-inspired palette */
+  --background: #FFFBF4;
+  --background-white: #FFFFFF;
+  --foreground: #1B1B1B;
+  --sidebar-bg: #FFFFFF;
+  --border: rgba(27, 27, 27, 0.12);
+  --border-strong: rgba(27, 27, 27, 0.24);
+  --primary: #1B1B1B;
+  --primary-hover: #3F3F3F;
+  --accent: #C4B1F9;
+  --accent-light: #F6F0FE;
+  --accent-strong: #9B7EF0;
+  --text-secondary: rgba(27, 27, 27, 0.55);
+  --text-tertiary: rgba(27, 27, 27, 0.40);
+  --cream: #FAF4EE;
+  --cream-dark: #F1E8E1;
+
+  /* Department colors — warm-toned to match Deel */
+  --dept-finance: #4A90D9;
+  --dept-marketing: #9B7EF0;
+  --dept-legal: #D4A843;
+  --dept-operations: #53A945;
+  --dept-hr: #D97DA6;
+  --dept-engineering: #6C6CEB;
+
+  /* Automation potential */
+  --auto-high: #53A945;
+  --auto-medium: #D4A843;
+  --auto-low: #D95C5C;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-white: var(--background-white);
   --color-foreground: var(--foreground);
+  --color-sidebar: var(--sidebar-bg);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-accent-strong: var(--accent-strong);
+  --color-secondary: var(--text-secondary);
+  --color-tertiary: var(--text-tertiary);
+  --color-cream: var(--cream);
+  --color-cream-dark: var(--cream-dark);
+
+  --color-dept-finance: var(--dept-finance);
+  --color-dept-marketing: var(--dept-marketing);
+  --color-dept-legal: var(--dept-legal);
+  --color-dept-operations: var(--dept-operations);
+  --color-dept-hr: var(--dept-hr);
+  --color-dept-engineering: var(--dept-engineering);
+
+  --color-auto-high: var(--auto-high);
+  --color-auto-medium: var(--auto-medium);
+  --color-auto-low: var(--auto-low);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(27, 27, 27, 0.16);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(27, 27, 27, 0.3);
 }
