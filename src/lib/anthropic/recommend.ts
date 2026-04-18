@@ -27,7 +27,7 @@ export async function generateRecommendations(
     messages: [
       {
         role: "user",
-        content: getRecommendationPrompt(workflow, context),
+        content: await getRecommendationPrompt(workflow, context),
       },
     ],
     tools: [

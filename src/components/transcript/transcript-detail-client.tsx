@@ -95,8 +95,8 @@ export function TranscriptDetailClient({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        {isCompleted && transcript.extracted_workflow && transcript.ai_recommendations ? (
+      {isCompleted && transcript.extracted_workflow && transcript.ai_recommendations ? (
+        <div className="flex-1 overflow-y-auto">
           <DetailTabs
             tabs={[
               {
@@ -128,45 +128,45 @@ export function TranscriptDetailClient({
               },
             ]}
           />
-        ) : (
-          <>
-            {/* Conversation — always shown */}
-            <div className="border-b border-border">
-              <div className="px-6 py-2.5 text-xs font-medium text-tertiary uppercase tracking-wider bg-background-white border-b border-border">
-                Interview Transcript
-              </div>
-              <div className="max-h-[50vh] overflow-y-auto bg-background">
-                <ConversationView
-                  rawTranscript={transcript.raw_transcript}
-                />
-              </div>
+        </div>
+      ) : (
+        <>
+          {/* Conversation — scrollable */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="px-6 py-2.5 text-xs font-medium text-tertiary uppercase tracking-wider bg-background-white border-b border-border sticky top-0 z-10">
+              Interview Transcript
             </div>
+            <div className="bg-background">
+              <ConversationView
+                rawTranscript={transcript.raw_transcript}
+              />
+            </div>
+          </div>
 
-            {/* Processing or Extract button */}
-            {isProcessing && processingStatus ? (
-              <ProcessingIndicator status={processingStatus} />
-            ) : isPending ? (
-              <div className="p-6">
-                {error && (
-                  <div className="mb-4 bg-auto-low/5 border border-auto-low/15 rounded-xl p-3 text-sm text-auto-low">
-                    {error}
-                  </div>
-                )}
-                <button
-                  onClick={startProcessingWithPolling}
-                  className="w-full max-w-md mx-auto block bg-foreground text-white rounded-xl px-6 py-3 text-sm font-medium hover:bg-primary-hover transition-colors"
-                >
-                  Extract Workflow
-                </button>
-                <p className="text-xs text-tertiary text-center mt-2">
-                  Analyze the conversation and extract structured workflow data
-                  using AI. Takes about 15-20 seconds.
-                </p>
-              </div>
-            ) : null}
-          </>
-        )}
-      </div>
+          {/* Sticky footer — Extract button or processing indicator */}
+          {isProcessing && processingStatus ? (
+            <ProcessingIndicator status={processingStatus} />
+          ) : isPending ? (
+            <div className="shrink-0 px-6 py-3 border-t border-border bg-background-white text-center">
+              {error && (
+                <div className="mb-2 bg-auto-low/5 border border-auto-low/15 rounded-xl p-2.5 text-sm text-auto-low text-left">
+                  {error}
+                </div>
+              )}
+              <button
+                onClick={startProcessingWithPolling}
+                className="w-full max-w-md mx-auto block bg-foreground text-white rounded-xl px-6 py-2.5 text-sm font-medium hover:bg-primary-hover transition-colors"
+              >
+                Extract Workflow
+              </button>
+              <p className="text-xs text-tertiary mt-1.5">
+                Analyze the conversation and extract structured workflow data
+                using AI. Takes about 15-20 seconds.
+              </p>
+            </div>
+          ) : null}
+        </>
+      )}
     </div>
   )
 }

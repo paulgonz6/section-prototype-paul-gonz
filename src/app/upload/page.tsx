@@ -9,8 +9,8 @@ export default function UploadPage() {
         </h1>
         <p className="text-sm text-secondary mt-1">
           Paste a raw interview transcript and watch the extraction pipeline
-          process it in real time. Use one of the examples below to get started
-          quickly.
+          process it in real time. Use the prompt template below to generate one
+          with Claude, or paste a real conversation.
         </p>
       </div>
 

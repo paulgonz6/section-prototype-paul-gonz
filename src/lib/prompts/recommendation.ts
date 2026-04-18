@@ -1,19 +1,17 @@
 import type { ExtractedWorkflow } from "@/lib/types"
+import { getActiveTemplate } from "./db"
+import { interpolateTemplate } from "./interpolate"
 
-export function getRecommendationPrompt(
-  workflow: ExtractedWorkflow,
-  context: { role: string; department: string; workflowName: string }
-): string {
-  return `You are an expert in workflow optimization, AI-assisted processes, and automation. Given the following extracted workflow, provide specific, actionable recommendations for every step — including those with Low automation potential where AI can still assist in a human-in-the-loop capacity.
+const FALLBACK_TEMPLATE = `You are an expert in workflow optimization, AI-assisted processes, and automation. Given the following extracted workflow, provide specific, actionable recommendations for every step — including those with Low automation potential where AI can still assist in a human-in-the-loop capacity.
 
 <workflow>
-${JSON.stringify(workflow, null, 2)}
+{{workflow}}
 </workflow>
 
 <context>
-Department: ${context.department}
-Role: ${context.role}
-Workflow: ${context.workflowName}
+Department: {{department}}
+Role: {{role}}
+Workflow: {{workflowName}}
 </context>
 
 For each recommendation provide:
@@ -27,9 +25,21 @@ For each recommendation provide:
 - rationale: 1-2 sentences on why this recommendation makes sense for this specific workflow and role
 
 Also provide:
-- summary: 2-3 sentence overview of the total optimization opportunity across automation AND AI-assisted improvements
+- summary: 1 concise sentence summarizing the core optimization opportunity (what changes and the main benefit)
 - totalEstimatedTimeSavings: sum of all time savings (e.g. "4.5 hours per cycle")
 - startHere: the single best recommendation to implement first (highest impact, lowest difficulty) — include stepOrder, stepName, and a brief reason
 
 Generate recommendations for ALL steps, including those with Low automation potential. For Low-potential steps, focus on AI-assisted approaches: using an LLM to prepare context, draft initial output, surface relevant information, or flag gaps — while keeping the human in the decision-making seat.`
+
+export async function getRecommendationPrompt(
+  workflow: ExtractedWorkflow,
+  context: { role: string; department: string; workflowName: string }
+): Promise<string> {
+  const template = await getActiveTemplate("recommendation")
+  return interpolateTemplate(template ?? FALLBACK_TEMPLATE, {
+    workflow: JSON.stringify(workflow, null, 2),
+    department: context.department,
+    role: context.role,
+    workflowName: context.workflowName,
+  })
 }

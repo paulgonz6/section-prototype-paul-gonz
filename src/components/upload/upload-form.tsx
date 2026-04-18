@@ -3,8 +3,32 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { DEPARTMENTS } from "@/lib/types"
-import { EXAMPLE_TRANSCRIPTS } from "@/lib/examples"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
+
+const PROMPT_TEMPLATE = `You are simulating a realistic interview between an operations analyst ("Agent") and an employee ("Employee") about a specific workflow the employee performs regularly.
+
+Generate a detailed interview transcript with the following context:
+
+- Role being interviewed: [FILL IN ROLE]
+- Department: [FILL IN DEPARTMENT]
+- Workflow being discussed: [FILL IN WORKFLOW NAME]
+- Transcript quality: [FILL IN QUALITY — e.g. "rich and detailed, the employee was very helpful and thorough" or "fragmented and vague, the employee gave short answers and was not very engaged" or "mixed, some parts are detailed but the employee rushed through others"]
+
+Requirements for the transcript:
+1. Format as a dialogue between "Agent:" and "Employee:" turns
+2. The Agent should ask probing questions about workflow steps, tools used, time estimates, pain points, handoffs, and automation opportunities
+3. The Employee should give specific, realistic answers including:
+   - Exact tool and system names (e.g., SAP, Salesforce, Google Sheets, Jira)
+   - Concrete time estimates ("takes about 20 minutes", "usually 3-5 business days")
+   - Specific pain points and workarounds
+   - Frequency and volume ("I do this about 80 times per month")
+   - Handoffs between teams or individuals
+   - Approval chains and escalation paths
+4. Include 6-10 workflow steps discussed across the conversation
+5. The conversation should feel natural — include tangents, clarifications, and the employee occasionally correcting themselves
+6. Total length: 400-600 words
+
+Generate the transcript now.`
 
 export function UploadForm() {
   const router = useRouter()
@@ -15,13 +39,18 @@ export function UploadForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [processingStep, setProcessingStep] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
-  const handleExample = (index: number) => {
-    const ex = EXAMPLE_TRANSCRIPTS[index]
-    setRole(ex.role)
-    setDepartment(ex.department)
-    setWorkflowName(ex.workflowName)
-    setRawTranscript(ex.rawTranscript)
+  const getFilledPrompt = () =>
+    PROMPT_TEMPLATE
+      .replace("[FILL IN ROLE]", role || "[FILL IN ROLE]")
+      .replace("[FILL IN DEPARTMENT]", department || "[FILL IN DEPARTMENT]")
+      .replace("[FILL IN WORKFLOW NAME]", workflowName || "[FILL IN WORKFLOW NAME]")
+
+  const handleCopyPrompt = async () => {
+    await navigator.clipboard.writeText(getFilledPrompt())
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,25 +106,6 @@ export function UploadForm() {
 
   return (
     <div className="max-w-3xl">
-      {/* Example buttons */}
-      <div className="mb-6">
-        <p className="text-xs font-medium text-tertiary uppercase tracking-wider mb-2">
-          Quick start with an example
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {EXAMPLE_TRANSCRIPTS.map((ex, i) => (
-            <button
-              key={i}
-              onClick={() => handleExample(i)}
-              disabled={isSubmitting}
-              className="px-3 py-1.5 text-xs bg-background-white border border-border rounded-lg hover:bg-cream hover:border-border-strong transition-colors disabled:opacity-50 font-medium text-secondary"
-            >
-              {ex.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Metadata inputs */}
         <div className="grid grid-cols-3 gap-4">
@@ -145,6 +155,35 @@ export function UploadForm() {
           </div>
         </div>
 
+        {/* Generate with Claude helper */}
+        <div>
+          <p className="text-xs font-medium text-tertiary uppercase tracking-wider mb-2">
+            Generate a transcript with Claude
+          </p>
+          <div className="bg-background-white border border-border rounded-lg p-4">
+            <p className="text-sm text-secondary mb-3">
+              Copy this prompt, paste it into Claude (or any LLM), then paste
+              the generated transcript below.
+              {(role || department || workflowName) && (
+                <span className="text-accent-strong font-medium">
+                  {" "}Your field values will be included automatically.
+                </span>
+              )}
+            </p>
+            <pre className="text-xs text-tertiary bg-cream border border-border rounded-lg p-3 mb-3 whitespace-pre-wrap max-h-48 overflow-y-auto font-mono">
+              {getFilledPrompt()}
+            </pre>
+            <button
+              type="button"
+              onClick={handleCopyPrompt}
+              disabled={isSubmitting}
+              className="px-4 py-2 text-xs font-medium bg-foreground text-white rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+            >
+              {copied ? "Copied!" : "Copy Prompt to Clipboard"}
+            </button>
+          </div>
+        </div>
+
         {/* Transcript textarea */}
         <div>
           <label className="block text-xs font-medium text-secondary mb-1.5">
@@ -175,7 +214,7 @@ export function UploadForm() {
           </div>
         )}
 
-        {/* Submit — Deel-style black button */}
+        {/* Submit */}
         <button
           type="submit"
           disabled={!canSubmit}

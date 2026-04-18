@@ -1,8 +1,10 @@
-export function getExtractionPrompt(rawTranscript: string): string {
-  return `You are an expert workflow analyst. Given the following interview transcript between an Agent and an Employee, extract a structured workflow representation.
+import { getActiveTemplate } from "./db"
+import { interpolateTemplate } from "./interpolate"
+
+const FALLBACK_TEMPLATE = `You are an expert workflow analyst. Given the following interview transcript between an Agent and an Employee, extract a structured workflow representation.
 
 <transcript>
-${rawTranscript}
+{{rawTranscript}}
 </transcript>
 
 Extract the following:
@@ -26,4 +28,8 @@ Extract the following:
 5. **totalTimePerCycle**: Total time for one complete cycle of this workflow (e.g. "6.5 hours", "3 days")
 
 Be precise. Only include information explicitly stated or strongly implied in the transcript. Do not invent tools or steps not mentioned. If the employee is vague about a step, still extract what you can but keep the description honest about the ambiguity.`
+
+export async function getExtractionPrompt(rawTranscript: string): Promise<string> {
+  const template = await getActiveTemplate("extraction")
+  return interpolateTemplate(template ?? FALLBACK_TEMPLATE, { rawTranscript })
 }

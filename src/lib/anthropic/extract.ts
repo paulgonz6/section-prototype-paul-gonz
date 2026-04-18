@@ -102,7 +102,7 @@ export async function extractWorkflow(
     model: "claude-sonnet-4-6",
     max_tokens: 4096,
     messages: [
-      { role: "user", content: getExtractionPrompt(rawTranscript) },
+      { role: "user", content: await getExtractionPrompt(rawTranscript) },
     ],
     tools: [
       {
