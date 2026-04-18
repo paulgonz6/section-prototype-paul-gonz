@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 
-const ADMIN_PASSWORD = "GONZO"
+const ADMIN_PASSWORD = "#hirepaul"
 const STORAGE_KEY = "admin_authenticated"
 
 export function PasswordGate({ children }: { children: React.ReactNode }) {
@@ -47,7 +47,7 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <input
-            type="password"
+            type="text"
             value={password}
             onChange={(e) => { setPassword(e.target.value); setError(false) }}
             placeholder="Password"

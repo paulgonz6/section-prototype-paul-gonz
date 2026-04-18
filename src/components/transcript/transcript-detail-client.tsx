@@ -28,49 +28,42 @@ export function TranscriptDetailClient({
     setError(null)
     setProcessingStatus("extracting")
 
-    const body = JSON.stringify({ transcriptId: transcript.id })
     const headers = { "Content-Type": "application/json" }
+    const id = transcript.id
+
+    async function post(url: string, data: Record<string, unknown>) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const text = await res.text()
+        try {
+          const parsed = JSON.parse(text)
+          throw new Error(parsed.error || "Request failed")
+        } catch (parseErr) {
+          if (parseErr instanceof SyntaxError) throw new Error("Request timed out — please try again")
+          throw parseErr
+        }
+      }
+      return res
+    }
 
     try {
       // Step 1: Extract workflow
-      const extractRes = await fetch("/api/process/extract", {
-        method: "POST",
-        headers,
-        body,
-      })
+      await post("/api/process/extract", { transcriptId: id })
 
-      if (!extractRes.ok) {
-        const text = await extractRes.text()
-        try {
-          const data = JSON.parse(text)
-          throw new Error(data.error || "Extraction failed")
-        } catch (parseErr) {
-          if (parseErr instanceof SyntaxError) throw new Error("Extraction timed out — please try again")
-          throw parseErr
-        }
-      }
-
-      // Step 2: Generate recommendations
+      // Step 2: Recommendations batch 1
       setProcessingStatus("recommending")
+      await post("/api/process/recommend", { transcriptId: id, step: "batch1" })
 
-      const recRes = await fetch("/api/process/recommend", {
-        method: "POST",
-        headers,
-        body,
-      })
+      // Step 3: Recommendations batch 2
+      await post("/api/process/recommend", { transcriptId: id, step: "batch2" })
 
-      if (!recRes.ok) {
-        const text = await recRes.text()
-        try {
-          const data = JSON.parse(text)
-          throw new Error(data.error || "Recommendations failed")
-        } catch (parseErr) {
-          if (parseErr instanceof SyntaxError) throw new Error("Recommendations timed out — please try again")
-          throw parseErr
-        }
-      }
-
-      const updated = await recRes.json()
+      // Step 4: Generate summary
+      const summaryRes = await post("/api/process/recommend", { transcriptId: id, step: "summary" })
+      const updated = await summaryRes.json()
       setTranscript(updated)
       setProcessingStatus(null)
     } catch (err) {
