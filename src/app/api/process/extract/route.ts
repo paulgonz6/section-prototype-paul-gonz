@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
 import { extractWorkflow } from "@/lib/anthropic/extract"
 
-export const maxDuration = 60
+export const maxDuration = 300
 
 export async function POST(request: Request) {
   const supabase = createServerClient()
